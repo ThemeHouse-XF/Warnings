@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="ThemeHouse_Warnings" title="[⌂] Warnings" version_string="1.1.7" version_id="1447261019" url="http://xf.themehouse.io/" install_callback_class="ThemeHouse_Install" install_callback_method="install" uninstall_callback_class="ThemeHouse_Install" uninstall_callback_method="uninstall">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates>
+    <template title="th_option_points_expiry_warnings"><![CDATA[<xen:radiounit label="{$preparedOption.title}" name="{$fieldPrefix}[{$preparedOption.option_id}][base]">
+	<xen:option value="never" selected="{$preparedOption.option_value.type} == 'never'">{xen:phrase never}</xen:option>
+	<xen:option value="other" selected="{$preparedOption.option_value.type} != 'never'" label="{xen:phrase after_time}:">
+		<xen:disabled>
+			<xen:spinbox name="{$fieldPrefix}[{$preparedOption.option_id}][default]" value="{xen:if $preparedOption.option_value.default, $preparedOption.option_value.default, 1}" min="0" />
+			<xen:select name="{$fieldPrefix}[{$preparedOption.option_id}][type]" value="{xen:if '{$preparedOption.option_value.type} == "never"', 'months', $preparedOption.option_value.type}"
+				inputclass="autoSize"
+			>
+				<xen:option value="days">{xen:phrase days}</xen:option>
+				<xen:option value="weeks">{xen:phrase weeks}</xen:option>
+				<xen:option value="months">{xen:phrase months}</xen:option>
+				<xen:option value="years">{xen:phrase years}</xen:option>
+			</xen:select>
+		</xen:disabled>
+	</xen:option>
+	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+	<xen:html>
+		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+		{xen:raw $editLink}
+	</xen:html>
+</xen:radiounit>]]></template>
+    <template title="th_please_reupgrade_warnings"><![CDATA[<xen:if is="{$xenOptions.currentVersionId} >= 1030000 && {$xenCache.th_warnings_xfVersionId} < 1030000">
+	<p class="importantMessage">{xen:phrase th_please_reupgrade_warnings}</p>
+</xen:if>]]></template>
+    <template title="th_topctrl_warnings"><![CDATA[<a href="{xen:adminlink warnings/add-group}" class="OverlayTrigger button">+ {xen:phrase th_create_new_warning_group_warnings}</a>]]></template>
+    <template title="th_warning_action_edit_user_groups_warnings"><![CDATA[<li>
+	<label for="ctrl_action_groups_length"><input type="radio" name="action" value="groups_length" class="Disabler" id="ctrl_action_groups_length" {xen:checked '{$action.action} == "groups_length"'}> {xen:phrase th_added_to_selected_groups_for_time_period_warnings}:</label>
+	<ul id="ctrl_action_groups_length_Disabler" class="disablerList">
+		<li>
+			<ul>
+				<li><label for="ctrl_groups_length_type_base_permanent"><input type="radio" name="groups_length_type_base" value="permanent" id="ctrl_groups_length_type_base_permanent" {xen:checked '{$action.groups_length_type} == "permanent"'}> {xen:phrase permanent}</label></li>
+				<li><label for="ctrl_groups_length_type_base_other"><input type="radio" name="groups_length_type_base" value="other" class="Disabler" id="ctrl_groups_length_type_base_other" {xen:checked '{$action.groups_length_type} != "permanent"'}> {xen:phrase temporary}:</label>
+					<ul id="ctrl_groups_length_type_base_other_Disabler" class="disablerList">
+						<li>
+							<input type="spinbox" name="groups_length" value="{xen:if $action.groups_length, $action.groups_length, 1}" step="1" min="0" class="textCtrl number SpinBox" id="ctrl_groups_length" autocomplete="off" />
+							<select name="groups_length_type" class="textCtrl autoSize" id="ctrl_groups_length_type">
+								<option value="days" {xen:selected '{$action.groups_length_type} == "days"'}>{xen:phrase days}</option>
+								<option value="weeks" {xen:selected '{$action.groups_length_type} == "weeks"'}>{xen:phrase weeks}</option>
+								<option value="months" {xen:selected '{$action.groups_length_type} == "months"'}>{xen:phrase months}</option>
+								<option value="years" {xen:selected '{$action.groups_length_type} == "years"'}>{xen:phrase years}</option>
+							</select>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</li>
+		<li>
+			<ul>
+				<xen:foreach loop="$userGroupOptionsLength" value="$userGroupOption">
+					<li><label for="ctrl_extra_user_group_ids_length_{$userGroupOption.value}"><input type="checkbox" name="extra_user_group_ids_length[]" value="{$userGroupOption.value}" id="ctrl_extra_user_group_ids_length_{$userGroupOption.value}" {xen:checked $userGroupOption.selected}> {$userGroupOption.label}</label></li>
+				</xen:foreach>
+			</ul>
+		</li>
+	</ul>
+</li>]]></template>
+    <template title="th_warning_action_edit_warnings"><![CDATA[<fieldset>
+	<xen:if is="{$warnings}">
+		<xen:checkboxunit name="warnings[]" label="{xen:phrase th_apply_to_warning_definitions_warnings}:">
+			<xen:foreach loop="$warnings" key="$warningId" value="$warning">
+				<xen:option value="{$warningId}" label="{$warning.title}" selected="in_array({$warningId}, {$action.warnings})" />
+			</xen:foreach>
+		</xen:checkboxunit>
+	</xen:if>
+	<xen:if is="{$warningGroups}">
+		<xen:checkboxunit name="warning_groups[]" label="{xen:phrase th_apply_to_warning_groups_warnings}:">
+			<xen:foreach loop="$warningGroups" key="$warningGroupId" value="$warningGroup">
+				<xen:option value="{$warningGroupId}" label="{$warningGroup.title}" selected="in_array({$warningGroupId}, {$action.warning_groups})" />
+			</xen:foreach>
+		</xen:checkboxunit>
+	</xen:if>
+</fieldset>]]></template>
+    <template title="th_warning_custom_edit_warnings"><![CDATA[<xen:title>{xen:phrase th_edit_custom_warning_warnings}</xen:title>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink warnings}#{xen:helper listitemid, 'warning-custom'}">{xen:phrase custom_warning}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:form action="{xen:adminlink warnings/custom-save}" class="AutoValidator" data-redirect="yes">
+	<fieldset>
+		<xen:spinboxunit label="{xen:phrase warning_points}:" name="points_default" value="{$xenOptions.th_customPointsDefault_warnings}" min="0" />
+		
+		<xen:radiounit label="{xen:phrase points_expiry}:" name="expiry_type_base">
+			<xen:option value="never" selected="{$xenOptions.th_customExpiry_warnings.type} == 'never'">{xen:phrase never}</xen:option>
+			<xen:option value="other" selected="{$xenOptions.th_customExpiry_warnings.type} != 'never'" label="{xen:phrase after_time}:">
+				<xen:disabled>
+					<xen:spinbox name="expiry_default" value="{xen:if $xenOptions.th_customExpiry_warnings.default, $xenOptions.th_customExpiry_warnings.default, 1}" min="0" />
+					<xen:select name="expiry_type" value="{xen:if '{$xenOptions.th_customExpiry_warnings.type} == "never"', 'months', $xenOptions.th_customExpiry_warnings.type}"
+						inputclass="autoSize"
+					>
+						<xen:option value="days">{xen:phrase days}</xen:option>
+						<xen:option value="weeks">{xen:phrase weeks}</xen:option>
+						<xen:option value="months">{xen:phrase months}</xen:option>
+						<xen:option value="years">{xen:phrase years}</xen:option>
+					</xen:select>
+				</xen:disabled>
+			</xen:option>
+		</xen:radiounit>
+	</fieldset>
+		
+	<xen:if is="{$xenOptions.th_warnings_allowReplyToContent}">
+		<h3 class="textHeading">{xen:phrase th_reply_settings_warnings}</h3>
+		
+		<xen:textboxunit label="{xen:phrase default_text}:" name="replyText" value="{$masterReplyText}" rows="2" inputclass="Elastic">
+			<xen:explain>{xen:phrase you_may_use_placeholders_to_dynamically_insert_warning}</xen:explain>
+		</xen:textboxunit>
+	</xen:if>
+
+	<h3 class="textHeading">{xen:phrase conversation_settings}</h3>
+	
+	<xen:textboxunit label="{xen:phrase default_title}:" name="conversationTitle" value="{$masterConversationTitle}" />
+	<xen:textboxunit label="{xen:phrase default_text}:" name="conversationText" value="{$masterConversationText}" rows="2" inputclass="Elastic">
+		<xen:explain>{xen:phrase you_may_use_placeholders_to_dynamically_insert_warning}</xen:explain>
+	</xen:textboxunit>
+	
+	<xen:submitunit save="{xen:phrase save_warning}" />
+</xen:form>]]></template>
+    <template title="th_warning_edit_warnings"><![CDATA[<fieldset>
+	<xen:selectunit label="{xen:phrase th_warning_group_warnings}:" name="warning_group_id" value="{$warning.warning_group_id}">
+		<xen:option value="0" label="({xen:phrase none})" />
+		<xen:options source="$warningGroupOptions" />
+	</xen:selectunit>
+				
+	<xen:spinboxunit name="display_order" value="{$warning.display_order}" label="{xen:phrase display_order}:" min="0" step="10" />
+</fieldset>
+
+<xen:if is="{$xenOptions.th_warnings_allowReplyToContent}">
+	<h3 class="textHeading">{xen:phrase th_reply_settings_warnings}</h3>
+	
+	<xen:textboxunit label="{xen:phrase default_text}:" name="replyText" value="{$masterReplyText}" rows="2" inputclass="Elastic">
+		<xen:explain>{xen:phrase you_may_use_placeholders_to_dynamically_insert_warning}</xen:explain>
+	</xen:textboxunit>
+</xen:if>]]></template>
+    <template title="th_warning_group_delete_warnings"><![CDATA[<xen:title>{xen:phrase th_confirm_deletion_of_warning_group_warnings}: {$warningGroup.title}</xen:title>
+<xen:h1>{xen:phrase th_confirm_deletion_of_warning_group_warnings}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'warnings/edit-group', '', 'warning_group_id={$warningGroup.warning_group_id}'}">{$warningGroup.title}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:require css="public:delete_confirmation.css" />
+
+<xen:form action="{xen:adminlink 'warnings/delete-group', '', 'warning_group_id={$warningGroup.warning_group_id}'}" class="deleteConfirmForm formOverlay">
+	<p>{xen:phrase th_please_confirm_that_you_want_to_delete_warning_group_warnings}:</p>
+	<strong><a href="{xen:adminlink 'warnings/edit-group', '', 'warning_group_id={$warningGroup.warning_group_id}'}">{$warningGroup.title}</a></strong>
+	<p class="muted">{xen:phrase th_warnings_will_be_disassociated_warnings}</p>
+
+	<xen:submitunit save="{xen:phrase th_delete_warning_group_warnings}" />
+	<input type="hidden" name="_xfConfirm" value="1" />
+</xen:form>]]></template>
+    <template title="th_warning_group_edit_warnings"><![CDATA[<xen:title>{xen:if $warningGroup.warning_group_id, '{xen:phrase th_edit_warning_group_warnings}: {$masterTitle}', '{xen:phrase th_create_new_warning_group_warnings}'}</xen:title>
+
+<xen:require css="public:thread_warnings.css" />
+
+<xen:if is="{$warningGroup.warning_group_id}">
+	<xen:navigation>
+		<xen:breadcrumb href="{xen:adminlink warnings}#_group{xen:helper listitemid, $warningGroup.warning_group_id}">{$masterTitle}</xen:breadcrumb>
+	</xen:navigation>
+</xen:if>
+
+<xen:form action="{xen:adminlink warnings/save-group}" class="AutoValidator" data-redirect="yes">
+
+	<xen:textboxunit name="title" value="{$masterTitle}" label="{xen:phrase title}:" data-livetitletemplate="{xen:if {$warningGroup.warning_group_id},
+		'{xen:phrase th_edit_warning_group_warnings}: <em>%s</em>',
+		'{xen:phrase th_create_new_warning_group_warnings}: <em>%s</em>'}" />
+	
+	<xen:spinboxunit name="display_order" value="{$warningGroup.display_order}" label="{xen:phrase display_order}:" min="0" step="10" />
+	
+	<xen:submitunit save="{xen:phrase th_save_warning_group_warnings}">
+		<xen:if is="{$warningGroup.warning_group_id}">
+			<input type="button" value="{xen:phrase th_delete_warning_group_warnings}..." accesskey="d" class="button OverlayTrigger"
+				data-href="{xen:adminlink 'warnings/delete-group', '', 'warning_group_id={$warningGroup.warning_group_id}'}" />
+		</xen:if>
+	</xen:submitunit>
+	
+	<input type="hidden" name="warning_group_id" value="{$warningGroup.warning_group_id}" />
+
+</xen:form>]]></template>
+    <template title="th_warning_group_list_warnings"><![CDATA[<xen:title>{xen:phrase th_warning_groups_warnings}</xen:title>
+
+<xen:topctrl><a href="{xen:adminlink warnings/add-group}" class="button OverlayTrigger">+ {xen:phrase th_create_new_warning_group_warnings}</a></xen:topctrl>
+
+<xen:require css="filter_list.css" />
+<xen:require js="js/xenforo/filter_list.js" />
+
+<xen:form action="{xen:adminlink warnings/groups}" class="section">
+	<xen:if is="{$warningGroups}">
+
+		<h2 class="subHeading">
+			<xen:include template="filter_list_controls" />
+			{xen:phrase th_warning_groups_warnings}
+		</h2>
+
+		<ol class="FilterList">
+			<xen:foreach loop="$warningGroups" value="$warningGroup">
+				<xen:listitem
+					id="{$warningGroup.warning_group_id}"
+					label="{$warningGroup.title}"
+					href="{xen:adminlink warnings/edit-group, '', 'warning_group_id={$warningGroup.warning_group_id}'}"
+					delete="{xen:adminlink warnings/delete-group, '', 'warning_group_id={$warningGroup.warning_group_id}'}">
+				</xen:listitem>
+			</xen:foreach>
+		</ol>
+
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $warningGroups}</span>', 'total={xen:count $warningGroups}'}</p>
+
+	<xen:else />
+		<div class="noResults">{xen:phrase th_no_warning_groups_have_been_added_yet_warnings}</div>
+	</xen:if>
+</xen:form>]]></template>
+    <template title="th_warning_list_warnings"><![CDATA[<ol class="FilterList Scrollable">
+	<xen:foreach loop="$warningGroups" key="$warningGroupId" value="$warnings">
+		<li>
+			<h3 class="textHeading" id="{xen:helper listitemid, 'group_{$warningGroupId}'}">
+				<xen:if is="{$warningGroupId}">{xen:helper warningGroup, $warningGroupId}<xen:else />({xen:phrase ungrouped})</xen:if>
+				<xen:if is="{$warningGroupId}"><a href="{xen:adminlink 'warnings/edit-group', '', 'warning_group_id={$warningGroupId}'}" class="edit controls OverlayTrigger" title="{xen:phrase edit}..."><span>{xen:phrase edit}</span></a></xen:if>
+			</h3>
+			<xen:if is="{$warnings}">
+				<ol>
+					<xen:foreach loop="$warnings" value="$warning">
+						<xen:listitem
+							id="warning-{$warning.warning_definition_id}"
+							label="{$warning.title}"
+							href="{xen:adminlink warnings/edit, $warning}"
+							delete="{xen:adminlink warnings/delete, $warning}" />
+					</xen:foreach>
+				</ol>
+			</xen:if>
+		</li>
+	</xen:foreach>
+	<xen:listitem
+		id="warning-custom"
+		label="{xen:phrase custom_warning}"
+		href="{xen:adminlink warnings/edit}" />
+</ol>]]></template>
+  </admin_templates>
+  <admin_template_modifications>
+    <modification template="PAGE_CONTAINER" modification_key="th_pageContainer_warnings" description="Add re-upgrade warning if required." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<div id="content">#]]></find>
+      <replace><![CDATA[${0}
+<xen:include template="th_please_reupgrade_warnings" />]]></replace>
+    </modification>
+    <modification template="warning_action_edit" modification_key="th_warningActionEditUserGroups_warnings" description="Adds user groups for specified time period to warning action editor." execution_order="9" enabled="1" action="callback">
+      <find><![CDATA[#<xen:option value="groups".*</xen:option>#Us]]></find>
+      <replace><![CDATA[ThemeHouse_Warnings_Listener_TemplateModification::warningActionEdit]]></replace>
+    </modification>
+    <modification template="warning_action_edit" modification_key="th_warningActionEdit_warnings" description="Adds definition checkboxes to warning action editor." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<xen:submitunit save="{xen:phrase save_warning_action}">#]]></find>
+      <replace><![CDATA[<xen:include template="th_warning_action_edit_warnings" />
+${0}]]></replace>
+    </modification>
+    <modification template="warning_edit" modification_key="th_warningEdit_warnings" description="Adds display order spin-box unit to warning definition editor." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<h3 class="textHeading">{xen:phrase conversation_settings}</h3>]]></find>
+      <replace><![CDATA[<xen:include template="th_warning_edit_warnings" />
+<h3 class="textHeading">{xen:phrase conversation_settings}</h3>]]></replace>
+    </modification>
+    <modification template="th_warning_list_autowarning" modification_key="th_warningListGroupsLengthAutoWarn_warnings" description="Adds snippet for actions with groups length action." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#{xen:if "{\$action.action} == 'groups'", '{xen:phrase added_to_selected_groups_while_above_points_threshold}'#]]></find>
+      <replace><![CDATA[${0},
+{xen:if "{$action.action} == 'groups_length'", '{xen:phrase th_added_to_selected_groups_for_period_warnings}'}]]></replace>
+    </modification>
+    <modification template="warning_list" modification_key="th_warningListGroupsLength_warnings" description="Adds snippet for actions with groups length action." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#{xen:if "{\$action.action} == 'groups'", '{xen:phrase added_to_selected_groups_while_above_points_threshold}'#]]></find>
+      <replace><![CDATA[${0},
+{xen:if "{$action.action} == 'groups_length'", '{xen:phrase th_added_to_selected_groups_for_period_warnings}'}]]></replace>
+    </modification>
+    <modification template="warning_list" modification_key="th_warningListTopCtrl_warnings" description="Adds button to create warning groups to top of warning list." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(<xen:topctrl>.*)(</xen:topctrl>)#Us]]></find>
+      <replace><![CDATA[${1}
+<xen:include template="th_topctrl_warnings" />
+${2}]]></replace>
+    </modification>
+    <modification template="warning_list" modification_key="th_warning_list_warnings" description="Adds group headings to warnings in warning list." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<ol class="FilterList Scrollable">\s*<xen:foreach loop="\$warnings" value="\$warning">.*</xen:foreach>\s*</ol>#Us]]></find>
+      <replace><![CDATA[<xen:include template="th_warning_list_warnings" />]]></replace>
+    </modification>
+  </admin_template_modifications>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="container_admin_params" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_ContainerAdminParams" callback_method="containerAdminParams" active="1" hint="" description=""/>
+    <listener event_id="controller_pre_dispatch" execute_order="10" callback_class="ThemeHouse_Listener_ControllerPreDispatch" callback_method="controllerPreDispatch" active="1" hint="" description=""/>
+    <listener event_id="file_health_check" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_FileHealthCheck" callback_method="fileHealthCheck" active="1" hint="" description=""/>
+    <listener event_id="init_dependencies" execute_order="10" callback_class="ThemeHouse_Listener_InitDependencies" callback_method="initDependencies" active="1" hint="" description=""/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassController" active="0" hint="XenForo_ControllerAdmin_Warning" description="XenForo_ControllerAdmin_Warning (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassDataWriter" active="0" hint="XenForo_DataWriter_WarningAction" description="XenForo_DataWriter_WarningAction (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassModel" active="0" hint="XenForo_Model_Warning" description="XenForo_Model_Warning (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassDataWriter" active="0" hint="XenForo_DataWriter_Warning" description="XenForo_DataWriter_Warning (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassDataWriter" active="0" hint="XenForo_DataWriter_WarningDefinition" description="XenForo_DataWriter_WarningDefinition (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassController" active="0" hint="XenForo_ControllerPublic_Warning" description="XenForo_ControllerPublic_Warning (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassController" active="0" hint="XenForo_ControllerPublic_Member" description="XenForo_ControllerPublic_Member (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassView" active="0" hint="XenForo_ViewPublic_Member_WarnFill" description="XenForo_ViewPublic_Member_WarnFill (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassController" active="1" hint="" description="(For XenForo 1.1 and below)" compatibility_switch="1"/>
+    <listener event_id="load_class_datawriter" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassDataWriter" active="1" hint="" description="(For XenForo 1.1 and below)" compatibility_switch="1"/>
+    <listener event_id="load_class_model" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassModel" active="1" hint="" description="(For XenForo 1.1 and below)" compatibility_switch="1"/>
+    <listener event_id="load_class_view" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_LoadClass" callback_method="loadClassView" active="1" hint="" description="(For XenForo 1.1 and below)" compatibility_switch="1"/>
+    <listener event_id="template_post_render" execute_order="10" callback_class="ThemeHouse_Warnings_Listener_TemplatePostRender" callback_method="templatePostRender" active="1" hint="" description="(For XenForo 1.1 and below)" compatibility_switch="1"/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates>
+    <template title="th_warning_warnings">
+      <subject><![CDATA[{xen:phrase th_warning_email_subject_warnings, 'title={$title}'}]]></subject>
+      <body_text><![CDATA[{xen:raw $message.messageText}]]></body_text>
+      <body_html><![CDATA[{xen:raw $message.messageHtml}]]></body_html>
+    </template>
+  </email_templates>
+  <email_template_modifications/>
+  <optiongroups>
+    <group group_id="th_warnings" display_order="2000" debug_only="0"/>
+    <option option_id="th_customExpiry_warnings" edit_format="template" data_type="array" can_backup="1" validation_class="ThemeHouse_Warnings_Option_PointsExpiry" validation_method="verifyOption">
+      <default_value>a:2:{s:7:"default";s:1:"1";s:4:"type";s:6:"months";}</default_value>
+      <edit_format_params>th_option_points_expiry_warnings</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="th_warnings" display_order="10"/>
+    </option>
+    <option option_id="th_customPointsDefault_warnings" edit_format="spinbox" data_type="integer" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params/>
+      <sub_options/>
+      <relation group_id="th_warnings" display_order="1"/>
+    </option>
+    <option option_id="th_warnings_allowReplyToContent" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params/>
+      <sub_options/>
+      <relation group_id="th_warnings" display_order="300"/>
+    </option>
+    <option option_id="th_warnings_autoTitlePublicWarning" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params/>
+      <sub_options/>
+      <relation group_id="th_warnings" display_order="100"/>
+    </option>
+    <option option_id="th_warnings_defaultContentAction" edit_format="radio" data_type="string" can_backup="1">
+      <default_value>none</default_value>
+      <edit_format_params>none={xen:phrase do_nothing}
+delete={xen:phrase delete_the_content}
+post={xen:phrase post_public_warning}</edit_format_params>
+      <sub_options/>
+      <relation group_id="th_warnings" display_order="200"/>
+    </option>
+    <option option_id="th_warnings_redirectToPost" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params/>
+      <sub_options/>
+      <relation group_id="th_warnings" display_order="500"/>
+    </option>
+    <option option_id="th_warnings_sendEmail" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params/>
+      <sub_options/>
+      <relation group_id="th_warnings" display_order="400"/>
+    </option>
+  </optiongroups>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="option_group_th_warnings" version_id="1394624558" version_string="1.0.5"><![CDATA[Warnings by ThemeHouse]]></phrase>
+    <phrase title="option_group_th_warnings_description" version_id="1394624558" version_string="1.0.5"><![CDATA[Options for the Warnings by ThemeHouse add-on.]]></phrase>
+    <phrase title="option_th_customExpiry_warnings" version_id="1394624558" version_string="1.0.5"><![CDATA[Custom Warning Default Points Expiry]]></phrase>
+    <phrase title="option_th_customExpiry_warnings_explain" version_id="1394624558" version_string="1.0.5"><![CDATA[]]></phrase>
+    <phrase title="option_th_customPointsDefault_warnings" version_id="1394624558" version_string="1.0.5"><![CDATA[Custom Warning Default Warning Points]]></phrase>
+    <phrase title="option_th_customPointsDefault_warnings_explain" version_id="1394624558" version_string="1.0.5"><![CDATA[]]></phrase>
+    <phrase title="option_th_warnings_allowReplyToContent" version_id="1405422380" version_string="1.0.7"><![CDATA[Allow reply to content]]></phrase>
+    <phrase title="option_th_warnings_allowReplyToContent_explain" version_id="1405422380" version_string="1.0.7"><![CDATA[Enabling this option adds the ability to reply to content when issuing a warning. This option applies to posts and profile posts only.]]></phrase>
+    <phrase title="option_th_warnings_autoTitlePublicWarning" version_id="1405422380" version_string="1.0.6"><![CDATA[Copy warning title to public warning title]]></phrase>
+    <phrase title="option_th_warnings_autoTitlePublicWarning_explain" version_id="1405422380" version_string="1.0.6"><![CDATA[Enabling this option will pre-fill the title for the content action "Post a public warning" with the title of the warning.]]></phrase>
+    <phrase title="option_th_warnings_defaultContentAction" version_id="1405422380" version_string="1.0.6"><![CDATA[Default content action]]></phrase>
+    <phrase title="option_th_warnings_defaultContentAction_explain" version_id="1405422380" version_string="1.0.6"><![CDATA[]]></phrase>
+    <phrase title="option_th_warnings_redirectToPost" version_id="1417007150" version_string="1.1.4"><![CDATA[Always redirect to exact post after warning post]]></phrase>
+    <phrase title="option_th_warnings_redirectToPost_explain" version_id="1417007150" version_string="1.1.4"><![CDATA[Enabling this option overrides the current behaviour that you are redirected to the last page viewed after creating a warning. Instead, for posts, this will redirect you to the exact post.]]></phrase>
+    <phrase title="option_th_warnings_sendEmail" version_id="1406211477" version_string="1.1.3"><![CDATA[Send email on warnings]]></phrase>
+    <phrase title="option_th_warnings_sendEmail_explain" version_id="1406211477" version_string="1.1.3"><![CDATA[Enabling this option will send the warned user an email with the same title and message as the conversation. Note that if no conversation title or message is given, no email will be sent.]]></phrase>
+    <phrase title="th_added_to_selected_groups_for_period_warnings" version_id="1378238703" version_string="1.0.0"><![CDATA[Added to selected groups for period]]></phrase>
+    <phrase title="th_added_to_selected_groups_for_time_period_warnings" version_id="1378238703" version_string="1.0.0"><![CDATA[Added to selected groups for time period]]></phrase>
+    <phrase title="th_apply_to_warning_definitions_warnings" version_id="1378236052" version_string="1.0.0"><![CDATA[Apply to Warning Definitions]]></phrase>
+    <phrase title="th_apply_to_warning_groups_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Apply to Warning Groups]]></phrase>
+    <phrase title="th_confirm_deletion_of_warning_group_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Confirm Deletion of Warning Group]]></phrase>
+    <phrase title="th_content_reply_warnings" version_id="1405422380" version_string="1.0.6"><![CDATA[Content Reply]]></phrase>
+    <phrase title="th_create_new_warning_group_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Create New Warning Group]]></phrase>
+    <phrase title="th_delete_warning_group_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Delete Warning Group]]></phrase>
+    <phrase title="th_edit_custom_warning_warnings" version_id="1394624558" version_string="1.0.5"><![CDATA[Edit Custom Warning]]></phrase>
+    <phrase title="th_edit_warning_group_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Edit Warning Group]]></phrase>
+    <phrase title="th_lock_content_prevent_further_replies_warnings" version_id="1405422380" version_string="1.0.6"><![CDATA[Lock content to prevent further replies]]></phrase>
+    <phrase title="th_no_warning_groups_have_been_added_yet_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[No warning groups have been added yet.]]></phrase>
+    <phrase title="th_please_confirm_that_you_want_to_delete_warning_group_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Please confirm that you want to delete the following warning group]]></phrase>
+    <phrase title="th_please_reupgrade_warnings" version_id="1391116167" version_string="1.0.3"><![CDATA[Please re-upgrade Warnings by ThemeHouse for full XenForo 1.3 support.]]></phrase>
+    <phrase title="th_reply_settings_warnings" version_id="1405422380" version_string="1.0.7"><![CDATA[Reply Settings]]></phrase>
+    <phrase title="th_reply_to_content_warnings" version_id="1405422380" version_string="1.0.6"><![CDATA[Reply to Content]]></phrase>
+    <phrase title="th_requested_warning_group_not_found_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[The requested warning group could not be found.]]></phrase>
+    <phrase title="th_save_warning_group_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Save Warning Group]]></phrase>
+    <phrase title="th_warnings_will_be_disassociated_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Warnings belonging to this group will disassociated, rather than deleted.]]></phrase>
+    <phrase title="th_warning_email_subject_warnings" version_id="1406211477" version_string="1.1.3"><![CDATA[Warning: {title}]]></phrase>
+    <phrase title="th_warning_groups_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Warning Groups]]></phrase>
+    <phrase title="th_warning_group_warnings" version_id="1379518746" version_string="1.0.2"><![CDATA[Warning Group]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates>
+    <template title="th_member_warn_panes_warnings" version_id="1405422380" version_string="1.0.6"><![CDATA[<xen:if is="{$canReplyToContent}">
+	<li>
+		<dl class="ctrlUnit">
+			<dt>{xen:phrase th_reply_to_content_warnings}:</dt>
+			<dd>
+				<ul>
+					<li><label><input type="checkbox" id="replyContent" class="Disabler" checked="checked" /> {xen:phrase message}:</label>
+						<ul id="replyContent_Disabler">
+							<li><textarea name="reply_message" class="textCtrl Elastic" id="ctrl_reply_message" rows="2"></textarea>
+							<xen:if is="{$canLockContent}">
+								<li><label><input type="checkbox" name="content_locked" value="1" /> {xen:phrase th_lock_content_prevent_further_replies_warnings}</label></li>
+							</xen:if>
+						</ul>
+					</li>
+				</ul>
+			</dd>
+		</dl>
+	</li>
+</xen:if>]]></template>
+    <template title="th_member_warn_tabs_warnings" version_id="1405422380" version_string="1.0.6"><![CDATA[<xen:if is="{$canReplyToContent}">
+	<xen:comment>This needs to match the condition for the content of the content reply tab</xen:comment>
+	<li><a>{xen:phrase th_content_reply_warnings}</a></li>
+</xen:if>]]></template>
+  </templates>
+  <public_template_modifications>
+    <modification template="footer" modification_key="th_copyrightNotice_warnings" description="Copyright notice for [⌂] Warnings" execution_order="1" enabled="1" action="callback">
+      <find><![CDATA[/{xen:phrase (?:xenforo|extra)_copyright}/]]></find>
+      <replace><![CDATA[ThemeHouse_Listener_InitDependencies::copyrightNotice]]></replace>
+    </modification>
+    <modification template="member_warn" modification_key="th_memberWarn_warnings" description="Adds JS to member warn page." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(<form action="{xen:link members/warn, \$user}")(.*)(<xen:if is="{\$warningCount}">.*)(<xen:if is="{\$warningCount}">)#Us]]></find>
+      <replace><![CDATA[<xen:require js="js/themehouse/warnings/member_warn.js" />
+${1}
+{xen:if $xenOptions.th_warnings_autoTitlePublicWarning, 'data-autotitlepublicwarning="true"'}
+{xen:if $xenOptions.th_warnings_defaultContentAction, 'data-defaultcontentaction="{$xenOptions.th_warnings_defaultContentAction}"'}
+${2}
+<xen:include template="th_member_warn_tabs_warnings" />
+${3}
+<xen:include template="th_member_warn_panes_warnings" />
+${4}]]></replace>
+    </modification>
+  </public_template_modifications>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
